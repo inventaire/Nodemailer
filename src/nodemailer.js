@@ -84,6 +84,10 @@ Nodemailer.prototype.sendMail = function(data, callback) {
 
     data = data || {};
     data.headers = data.headers || {};
+    var preview = data.preview || false;
+    var previewDir = data.previewDir || '/tmp/nodemailer-preview';
+    var previewFilename = data.previewFilename || 'index.html';
+    var previewFilePath = previewDir + '/' + previewFilename;
     callback = callback || function() {};
 
     // apply defaults
@@ -142,7 +146,16 @@ Nodemailer.prototype.sendMail = function(data, callback) {
             if (err) {
                 return callback(err);
             }
-            this.transporter.send(mail, callback);
+            // you can either be in preview or send mode
+            if (preview) {
+                if (!fs.existsSync(previewDir)){
+                    fs.mkdirSync(previewDir);
+                }
+                console.log('updated email preview:', previewFilePath);
+                fs.writeFileSync(previewFilePath, mail.data.html);
+            } else {
+                this.transporter.send(mail, callback);
+            }
         }.bind(this));
     }.bind(this));
 
