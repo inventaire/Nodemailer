@@ -84,10 +84,6 @@ Nodemailer.prototype.sendMail = function(data, callback) {
 
     data = data || {};
     data.headers = data.headers || {};
-    var preview = data.preview || false;
-    var previewDir = data.previewDir || '/tmp/nodemailer-preview';
-    var previewFilename = data.previewFilename || 'index.html';
-    var previewFilePath = previewDir + '/' + previewFilename;
     callback = callback || function() {};
 
     // apply defaults
@@ -103,6 +99,8 @@ Nodemailer.prototype.sendMail = function(data, callback) {
             }.bind(this));
         }
     }.bind(this));
+
+    var preview = data.preview || false;
 
     var mail = {
         data: data,
@@ -148,11 +146,17 @@ Nodemailer.prototype.sendMail = function(data, callback) {
             }
             // you can either be in preview or send mode
             if (preview) {
+                var previewDir = data.previewDir || '/tmp/nodemailer-preview';
+                var previewFilename = data.previewFilename || 'preview.html';
+                var previewFilePath = previewDir + '/' + previewFilename;
+                var previewDataPath = previewDir + '/data.json';
                 if (!fs.existsSync(previewDir)){
                     fs.mkdirSync(previewDir);
                 }
-                console.log('updated email preview:', previewFilePath);
-                fs.writeFileSync(previewFilePath, mail.data.html);
+                console.log('email not sent, updated email preview:', previewFilePath);
+                fs.writeFile(previewFilePath, mail.data.html);
+                var json = JSON.stringify(mail.data, null, 4)
+                fs.writeFile(previewDataPath, json);
             } else {
                 this.transporter.send(mail, callback);
             }
