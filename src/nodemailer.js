@@ -156,7 +156,7 @@ Nodemailer.prototype.sendMail = function(data, callback) {
                 console.log('email not sent, updated email preview:', previewFilePath);
                 fs.writeFile(previewFilePath, mail.data.html);
                 var json = JSON.stringify(mail.data, null, 4)
-                fs.writeFile(previewDataPath, json);
+                fs.writeFile(previewDataPath, json, callback);
             } else {
                 this.transporter.send(mail, callback);
             }
